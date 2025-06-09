@@ -121,4 +121,4 @@ export const spacesData: ThirdSpace[] = [
       lng: -105.270546
     }
   }
-];
+]
