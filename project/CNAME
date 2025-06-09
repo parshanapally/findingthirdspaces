@@ -1,1 +1,1 @@
-findingthirdspaces.com
+echo "findingthirdspaces.com" > public/CNAME
