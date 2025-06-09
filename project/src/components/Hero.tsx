@@ -1,7 +1,12 @@
 import React from 'react';
-import { Search, ChevronDown } from 'lucide-react';
+import { Search, ChevronDown, MapPin } from 'lucide-react';
 
-const Hero: React.FC = () => {
+interface HeroProps {
+  onFindNearby: () => void;
+  loading: boolean;
+}
+
+const Hero: React.FC<HeroProps> = ({ onFindNearby, loading }) => {
   return (
     <section id="home" className="relative min-h-[600px] flex items-center justify-center overflow-hidden">
       {/* Background image with overlay */}
@@ -34,6 +39,18 @@ const Hero: React.FC = () => {
           <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-full flex items-center transition-colors duration-300">
             <Search size={20} className="mr-2" />
             <span>Search</span>
+          </button>
+        </div>
+        
+        {/* Find Near Me Button */}
+        <div className="mt-6">
+          <button
+            onClick={onFindNearby}
+            disabled={loading}
+            className="bg-white/20 backdrop-blur-sm text-white px-6 py-3 rounded-full flex items-center mx-auto transition-all duration-300 hover:bg-white/30 disabled:opacity-50 disabled:cursor-not-allowed border border-white/30"
+          >
+            <MapPin size={20} className="mr-2" />
+            <span>{loading ? 'Finding nearby spaces...' : 'Find Spaces Near Me'}</span>
           </button>
         </div>
         
