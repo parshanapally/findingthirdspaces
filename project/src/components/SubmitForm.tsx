@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { SpaceType, spaceTypeLabels } from '../types';
-import { Upload, Check } from 'lucide-react';
+import { Upload, Check, AlertCircle, Loader } from 'lucide-react';
+import { submitSpaceToGoogleSheets } from '../services/formSubmission';
 
 const SubmitForm: React.FC = () => {
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     type: '' as SpaceType | '',
@@ -17,6 +20,8 @@ const SubmitForm: React.FC = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    // Clear error when user starts typing
+    if (submitError) setSubmitError('');
   };
 
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -30,24 +35,37 @@ const SubmitForm: React.FC = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
-    setFormSubmitted(true);
+    setSubmitting(true);
+    setSubmitError('');
     
-    // Reset after 3 seconds
-    setTimeout(() => {
-      setFormSubmitted(false);
-      setFormData({
-        name: '',
-        type: '',
-        description: '',
-        address: '',
-        city: '',
-        amenities: [],
-        email: ''
-      });
-    }, 3000);
+    try {
+      await submitSpaceToGoogleSheets(formData);
+      
+      console.log('Form submitted successfully:', formData);
+      setFormSubmitted(true);
+      
+      // Reset after 5 seconds
+      setTimeout(() => {
+        setFormSubmitted(false);
+        setFormData({
+          name: '',
+          type: '',
+          description: '',
+          address: '',
+          city: '',
+          amenities: [],
+          email: ''
+        });
+      }, 5000);
+      
+    } catch (error) {
+      console.error('Submission error:', error);
+      setSubmitError('Failed to submit space. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const amenitiesOptions = [
@@ -95,11 +113,21 @@ const SubmitForm: React.FC = () => {
                   </div>
                   <h3 className="text-xl font-semibold mb-2">Thank You!</h3>
                   <p className="text-gray-600 mb-4">
-                    Your space has been submitted successfully. Our team will review it shortly.
+                    Your space has been submitted successfully. Our team will review it and get back to you within 2-3 business days.
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    We've sent a confirmation to your email address.
                   </p>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit}>
+                  {submitError && (
+                    <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center">
+                      <AlertCircle size={20} className="text-red-600 mr-2" />
+                      <span className="text-red-700 text-sm">{submitError}</span>
+                    </div>
+                  )}
+                  
                   <div className="mb-4">
                     <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
                       Space Name*
@@ -109,9 +137,11 @@ const SubmitForm: React.FC = () => {
                       id="name"
                       name="name"
                       required
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+                      disabled={submitting}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100"
                       value={formData.name}
                       onChange={handleChange}
+                      placeholder="e.g., Central Library"
                     />
                   </div>
                   
@@ -123,7 +153,8 @@ const SubmitForm: React.FC = () => {
                       id="type"
                       name="type"
                       required
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+                      disabled={submitting}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100"
                       value={formData.type}
                       onChange={handleChange}
                     >
@@ -145,9 +176,11 @@ const SubmitForm: React.FC = () => {
                       name="description"
                       rows={4}
                       required
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+                      disabled={submitting}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100"
                       value={formData.description}
                       onChange={handleChange}
+                      placeholder="Describe what makes this space special and why it's a great third space..."
                     ></textarea>
                   </div>
                   
@@ -161,23 +194,27 @@ const SubmitForm: React.FC = () => {
                         id="address"
                         name="address"
                         required
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+                        disabled={submitting}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100"
                         value={formData.address}
                         onChange={handleChange}
+                        placeholder="123 Main Street"
                       />
                     </div>
                     <div>
                       <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
-                        City, State*
+                        City, State/Country*
                       </label>
                       <input
                         type="text"
                         id="city"
                         name="city"
                         required
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+                        disabled={submitting}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100"
                         value={formData.city}
                         onChange={handleChange}
+                        placeholder="Austin, TX or London, UK"
                       />
                     </div>
                   </div>
@@ -194,9 +231,10 @@ const SubmitForm: React.FC = () => {
                             id={`amenity-${amenity}`}
                             name="amenities"
                             value={amenity}
+                            disabled={submitting}
                             checked={formData.amenities.includes(amenity)}
                             onChange={handleCheckboxChange}
-                            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded disabled:opacity-50"
                           />
                           <label 
                             htmlFor={`amenity-${amenity}`} 
@@ -218,33 +256,42 @@ const SubmitForm: React.FC = () => {
                       id="email"
                       name="email"
                       required
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+                      disabled={submitting}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100"
                       value={formData.email}
                       onChange={handleChange}
+                      placeholder="your@email.com"
                     />
                     <p className="text-xs text-gray-500 mt-1">
                       We'll contact you if we need more information about this space.
                     </p>
                   </div>
                   
-                  <div className="mb-6 border border-dashed border-gray-300 rounded-lg p-4 text-center">
+                  <div className="mb-6 border border-dashed border-gray-300 rounded-lg p-4 text-center opacity-50">
                     <div className="flex flex-col items-center">
-                      <Upload size={24} className="text-gray-500 mb-2" />
-                      <p className="text-sm text-gray-700 mb-1">
-                        Upload photos (optional)
+                      <Upload size={24} className="text-gray-400 mb-2" />
+                      <p className="text-sm text-gray-500 mb-1">
+                        Photo upload coming soon
                       </p>
-                      <p className="text-xs text-gray-500">
-                        Drag & drop files here or click to browse
+                      <p className="text-xs text-gray-400">
+                        For now, include photo links in the description
                       </p>
-                      <input type="file" className="hidden" accept="image/*" multiple />
                     </div>
                   </div>
                   
                   <button
                     type="submit"
-                    className="w-full bg-indigo-600 text-white py-3 rounded-lg font-medium hover:bg-indigo-700 transition-colors duration-200"
+                    disabled={submitting}
+                    className="w-full bg-indigo-600 text-white py-3 rounded-lg font-medium hover:bg-indigo-700 transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center"
                   >
-                    Submit Space
+                    {submitting ? (
+                      <>
+                        <Loader size={20} className="animate-spin mr-2" />
+                        Submitting...
+                      </>
+                    ) : (
+                      'Submit Space'
+                    )}
                   </button>
                 </form>
               )}
