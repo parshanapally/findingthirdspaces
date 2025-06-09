@@ -14,19 +14,20 @@ export const submitSpaceToGoogleSheets = async (formData) => {
       status: 'Pending Review'
     };
 
-    // Use form submission instead of fetch to avoid CORS
+    // Use hidden form submission instead of fetch to avoid CORS
     return new Promise((resolve, reject) => {
-      // Create a hidden iframe to submit the form
+      // Create a hidden iframe
       const iframe = document.createElement('iframe');
       iframe.style.display = 'none';
-      iframe.name = 'hidden_iframe';
+      iframe.name = 'hidden_iframe_' + Date.now();
       document.body.appendChild(iframe);
 
       // Create a form
       const form = document.createElement('form');
       form.action = GOOGLE_SCRIPT_URL;
       form.method = 'POST';
-      form.target = 'hidden_iframe';
+      form.target = iframe.name;
+      form.style.display = 'none';
 
       // Add form data as hidden inputs
       Object.keys(submissionData).forEach(key => {
@@ -37,32 +38,43 @@ export const submitSpaceToGoogleSheets = async (formData) => {
         form.appendChild(input);
       });
 
+      // Set up cleanup function
+      const cleanup = () => {
+        if (document.body.contains(iframe)) {
+          document.body.removeChild(iframe);
+        }
+        if (document.body.contains(form)) {
+          document.body.removeChild(form);
+        }
+      };
+
       // Handle iframe load (submission complete)
       iframe.onload = () => {
-        document.body.removeChild(iframe);
-        document.body.removeChild(form);
-        resolve({ success: true, message: 'Form submitted successfully' });
+        setTimeout(() => {
+          cleanup();
+          resolve({ success: true, message: 'Form submitted successfully' });
+        }, 1000);
       };
 
       // Handle iframe error
       iframe.onerror = () => {
-        document.body.removeChild(iframe);
-        document.body.removeChild(form);
+        cleanup();
         reject(new Error('Form submission failed'));
       };
 
-      // Submit the form
+      // Add form to document and submit
       document.body.appendChild(form);
-      form.submit();
-
-      // Timeout after 10 seconds
+      
+      // Submit after a short delay to ensure iframe is ready
       setTimeout(() => {
-        if (document.body.contains(iframe)) {
-          document.body.removeChild(iframe);
-          document.body.removeChild(form);
-          resolve({ success: true, message: 'Form submitted (timeout)' });
-        }
-      }, 10000);
+        form.submit();
+      }, 100);
+
+      // Fallback timeout after 15 seconds
+      setTimeout(() => {
+        cleanup();
+        resolve({ success: true, message: 'Form submitted successfully (timeout)' });
+      }, 15000);
     });
     
   } catch (error) {
