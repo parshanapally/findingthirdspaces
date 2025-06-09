@@ -10,6 +10,7 @@ interface SpacesListProps {
   usingRealData?: boolean;
   onFindNearby?: () => void;
   onResetToSample?: () => void;
+  searchLocation?: string;
 }
 
 const SpacesList: React.FC<SpacesListProps> = ({ 
@@ -18,7 +19,8 @@ const SpacesList: React.FC<SpacesListProps> = ({
   loading = false,
   usingRealData = false,
   onFindNearby,
-  onResetToSample
+  onResetToSample,
+  searchLocation = ''
 }) => {
   const [selectedType, setSelectedType] = useState<SpaceType | 'all'>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -41,7 +43,9 @@ const SpacesList: React.FC<SpacesListProps> = ({
               <div className="flex items-center">
                 <MapPin className="text-indigo-600 mr-2" size={20} />
                 <span className="text-sm font-medium text-gray-700">
-                  {loading ? 'Searching for nearby spaces...' : `Showing ${spaces.length} real spaces near you`}
+                  {loading ? 'Searching for nearby spaces...' : 
+                   searchLocation ? `Showing ${spaces.length} spaces in ${searchLocation}` :
+                   `Showing ${spaces.length} real spaces near you`}
                 </span>
               </div>
               {!loading && usingRealData && onResetToSample && (

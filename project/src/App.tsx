@@ -10,6 +10,7 @@ import SubmitForm from './components/SubmitForm';
 import Footer from './components/Footer';
 import { spacesData } from './data/spacesData';
 import { searchNearbyThirdSpaces } from './services/googlePlaces';
+import { searchThirdSpacesByLocation } from './services/locationSearch';
 import { ThirdSpace } from './types';
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
   const [spaces, setSpaces] = useState<ThirdSpace[]>(spacesData);
   const [loading, setLoading] = useState(false);
   const [usingRealData, setUsingRealData] = useState(false);
+  const [searchLocation, setSearchLocation] = useState<string>('');
 
   useEffect(() => {
     document.title = "Third Spaces - Discover Places Beyond Home & Work";
@@ -29,6 +31,7 @@ function App() {
 
   const findNearbySpaces = () => {
     setLoading(true);
+    setSearchLocation('');
     
     if (!navigator.geolocation) {
       alert('Geolocation is not supported by this browser.');
@@ -49,6 +52,7 @@ function App() {
           if (realSpaces.length > 0) {
             setSpaces(realSpaces);
             setUsingRealData(true);
+            setSearchLocation('your location');
           } else {
             alert('No third spaces found nearby. Showing sample locations.');
             setSpaces(spacesData);
@@ -73,9 +77,38 @@ function App() {
     );
   };
 
+  const searchByLocation = async (query: string) => {
+    setLoading(true);
+    
+    try {
+      const searchResults = await searchThirdSpacesByLocation(query);
+      
+      if (searchResults.length > 0) {
+        setSpaces(searchResults);
+        setUsingRealData(true);
+        setSearchLocation(query);
+      } else {
+        alert(`No third spaces found for "${query}". Try a different search.`);
+        setSpaces(spacesData);
+        setUsingRealData(false);
+        setSearchLocation('');
+      }
+    } catch (error) {
+      console.error('Search error:', error);
+      const errorMessage = error.message || 'Search failed. Please try again.';
+      alert(errorMessage);
+      setSpaces(spacesData);
+      setUsingRealData(false);
+      setSearchLocation('');
+    }
+    
+    setLoading(false);
+  };
+
   const resetToSampleData = () => {
     setSpaces(spacesData);
     setUsingRealData(false);
+    setSearchLocation('');
   };
 
   return (
@@ -83,6 +116,7 @@ function App() {
       <Header />
       <Hero 
         onFindNearby={findNearbySpaces} 
+        onSearchLocation={searchByLocation}
         loading={loading}
       />
       <Categories />
@@ -93,6 +127,7 @@ function App() {
         usingRealData={usingRealData}
         onFindNearby={findNearbySpaces}
         onResetToSample={resetToSampleData}
+        searchLocation={searchLocation}
       />
       <MapSection spaces={spaces} onSpaceClick={handleSpaceClick} />
       <SubmitForm />

@@ -9,7 +9,7 @@ const Footer: React.FC = () => {
           <div>
             <div className="flex items-center mb-4">
               <MapPin className="mr-2 text-indigo-400" size={24} />
-              <h2 className="text-xl font-bold">Third Spaces</h2>
+              <h2 className="text-xl font-bold">Finding Third Spaces</h2>
             </div>
             <p className="text-gray-400 mb-6">
               Discover places beyond home and work where communities thrive and connections are made.

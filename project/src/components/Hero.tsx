@@ -1,12 +1,22 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Search, ChevronDown, MapPin } from 'lucide-react';
 
 interface HeroProps {
   onFindNearby: () => void;
+  onSearchLocation: (query: string) => void;
   loading: boolean;
 }
 
-const Hero: React.FC<HeroProps> = ({ onFindNearby, loading }) => {
+const Hero: React.FC<HeroProps> = ({ onFindNearby, onSearchLocation, loading }) => {
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      onSearchLocation(searchQuery.trim());
+    }
+  };
+
   return (
     <section id="home" className="relative min-h-[600px] flex items-center justify-center overflow-hidden">
       {/* Background image with overlay */}
@@ -22,7 +32,7 @@ const Hero: React.FC<HeroProps> = ({ onFindNearby, loading }) => {
       <div className="container mx-auto px-4 relative z-10 text-center py-16 mt-12">
         <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
           Discover Your Perfect <br className="hidden md:block" />
-          <span className="text-indigo-400">Third Space</span>
+          <span className="text-indigo-400">Finding Third Spaces</span>
         </h1>
         
         <p className="text-xl text-white/90 max-w-2xl mx-auto mb-8">
@@ -30,20 +40,35 @@ const Hero: React.FC<HeroProps> = ({ onFindNearby, loading }) => {
           creativity flourishes, and connections are made.
         </p>
         
-        <div className="max-w-xl mx-auto bg-white rounded-full overflow-hidden shadow-xl p-1 flex">
+        {/* Search Form */}
+        <form onSubmit={handleSearch} className="max-w-xl mx-auto bg-white rounded-full overflow-hidden shadow-xl p-1 flex">
           <input 
             type="text" 
-            placeholder="Find a café, library, or community space..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search 'cafes in Paris' or 'libraries in Tokyo'" 
             className="w-full py-3 px-6 outline-none text-gray-700"
+            disabled={loading}
           />
-          <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-full flex items-center transition-colors duration-300">
+          <button 
+            type="submit"
+            disabled={loading || !searchQuery.trim()}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-full flex items-center transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             <Search size={20} className="mr-2" />
-            <span>Search</span>
+            <span>{loading ? 'Searching...' : 'Search'}</span>
           </button>
+        </form>
+        
+        {/* Divider */}
+        <div className="flex items-center justify-center my-6">
+          <div className="border-t border-white/30 flex-1 max-w-20"></div>
+          <span className="px-4 text-white/70 text-sm">or</span>
+          <div className="border-t border-white/30 flex-1 max-w-20"></div>
         </div>
         
         {/* Find Near Me Button */}
-        <div className="mt-6">
+        <div>
           <button
             onClick={onFindNearby}
             disabled={loading}
@@ -52,6 +77,11 @@ const Hero: React.FC<HeroProps> = ({ onFindNearby, loading }) => {
             <MapPin size={20} className="mr-2" />
             <span>{loading ? 'Finding nearby spaces...' : 'Find Spaces Near Me'}</span>
           </button>
+        </div>
+
+        {/* Examples */}
+        <div className="mt-4 text-white/60 text-sm">
+          Try: "cafes in London", "libraries in NYC", "coworking in Berlin"
         </div>
         
         <div className="mt-16 flex justify-center">

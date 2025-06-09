@@ -34,7 +34,7 @@ const Header: React.FC = () => {
               isScrolled ? 'text-gray-900' : 'text-white'
             }`}
           >
-            Third Spaces
+            Finding Third Spaces
           </h1>
         </div>
         
