@@ -1,7 +1,7 @@
 export const submitSpaceToGoogleSheets = async (formData) => {
   try {
     // Paste your Web App URL here
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw4gR2Bkv6WbIrH_kioDcaCCbYt_IRbCjOhvSFNjym4l6uU-qFsc8i57e3HK1-A8F8/exec';
+    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyBJISXobWTt2y7teqpUaUfo2y3RWtbj9SDphpvr0I3tPLqops_yuory4eBbWUbs56X/exec';
     
     const submissionData = {
       timestamp: new Date().toISOString(),
