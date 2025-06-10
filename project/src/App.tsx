@@ -130,7 +130,7 @@ function App() {
         searchLocation={searchLocation}
       />
       <MapSection spaces={spaces} onSpaceClick={handleSpaceClick} />
-      <SubmitForm />
+      {/* <SubmitForm /> */}
       <Footer />
       {selectedSpace && (
         <SpaceDetail 

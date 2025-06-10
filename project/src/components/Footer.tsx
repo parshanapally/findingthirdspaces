@@ -14,7 +14,7 @@ const Footer: React.FC = () => {
             <p className="text-gray-400 mb-6">
               Discover places beyond home and work where communities thrive and connections are made.
             </p>
-            <div className="flex space-x-4">
+            {/* <div className="flex space-x-4">
               <a href="#" className="text-gray-400 hover:text-white transition-colors duration-200">
                 <Instagram size={20} />
               </a>
@@ -24,13 +24,13 @@ const Footer: React.FC = () => {
               <a href="#" className="text-gray-400 hover:text-white transition-colors duration-200">
                 <Facebook size={20} />
               </a>
-            </div>
+            </div> */}
           </div>
           
           <div>
             <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
             <ul className="space-y-2">
-              {['Home', 'About Us', 'Explore Spaces', 'Categories', 'Submit a Space', 'Contact'].map((link) => (
+              {['Home', 'About Us', 'Explore Spaces', 'Categories'].map((link) => (
                 <li key={link}>
                   <a 
                     href="#" 
@@ -59,7 +59,7 @@ const Footer: React.FC = () => {
             </ul>
           </div>
           
-          <div>
+          {/* <div>
             <h3 className="text-lg font-semibold mb-4">Contact Us</h3>
             <ul className="space-y-4">
               <li className="flex">
@@ -88,7 +88,7 @@ const Footer: React.FC = () => {
                 </a>
               </li>
             </ul>
-          </div>
+          </div> */}
         </div>
         
         <div className="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">

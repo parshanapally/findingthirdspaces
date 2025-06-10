@@ -10,7 +10,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist"
+    "deploy": "gh-pages -d dist",
+     "postdeploy": "echo 'Deployment complete - check custom domain setting'"
   },
   "dependencies": {
     "@googlemaps/js-api-loader": "^1.16.8",
