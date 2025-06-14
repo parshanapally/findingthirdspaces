@@ -119,7 +119,7 @@ function App() {
         onSearchLocation={searchByLocation}
         loading={loading}
       />
-      <Categories />
+   
       <SpacesList 
         spaces={spaces} 
         onSpaceClick={handleSpaceClick}
@@ -129,6 +129,7 @@ function App() {
         onResetToSample={resetToSampleData}
         searchLocation={searchLocation}
       />
+     <Categories />
       <MapSection spaces={spaces} onSpaceClick={handleSpaceClick} />
       {/* <SubmitForm /> */}
       <Footer />
