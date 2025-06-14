@@ -60,40 +60,8 @@ const Hero: React.FC<HeroProps> = ({ onFindNearby, onSearchLocation, loading }) 
           </button>
         </form>
         
-        {/* Divider */}
-        <div className="flex items-center justify-center my-6">
-          <div className="border-t border-white/30 flex-1 max-w-20"></div>
-          <span className="px-4 text-white/70 text-sm">or</span>
-          <div className="border-t border-white/30 flex-1 max-w-20"></div>
-        </div>
         
-        {/* Find Near Me Button */}
-        <div>
-          <button
-            onClick={onFindNearby}
-            disabled={loading}
-            className="bg-white/20 backdrop-blur-sm text-white px-6 py-3 rounded-full flex items-center mx-auto transition-all duration-300 hover:bg-white/30 disabled:opacity-50 disabled:cursor-not-allowed border border-white/30"
-          >
-            <MapPin size={20} className="mr-2" />
-            <span>{loading ? 'Finding nearby spaces...' : 'Find Spaces Near Me'}</span>
-          </button>
-        </div>
 
-        {/* Examples */}
-        <div className="mt-4 text-white/60 text-sm">
-          Try: "cafes in London", "libraries in NYC", "coworking in Berlin"
-        </div>
-        
-        <div className="mt-16 flex justify-center">
-          <a 
-            href="#explore" 
-            className="text-white flex flex-col items-center transition-opacity duration-300 hover:opacity-80"
-            aria-label="Scroll down"
-          >
-            <span className="mb-2">Explore Spaces</span>
-            <ChevronDown size={24} className="animate-bounce" />
-          </a>
-        </div>
       </div>
     </section>
   );
