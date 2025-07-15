@@ -90,13 +90,13 @@ const SpaceDetail: React.FC<SpaceDetailProps> = ({ space, onClose }) => {
           
           <h3 className="text-lg font-semibold mb-3">Location</h3>
             <h3 className="text-lg font-semibold mb-3" >{space.address}, {space.city}</h3>
-          {/* <div className="bg-gray-100 h-48 rounded-lg mb-6 flex items-center justify-center">
+          <div className="bg-gray-100 h-48 rounded-lg mb-6 flex items-center justify-center">
             <div className="text-center text-gray-500">
               <MapPin size={24} className="mx-auto mb-2" />
               <p>Interactive map would be displayed here</p>
               <p className="text-sm">{space.coordinates.lat}, {space.coordinates.lng}</p>
             </div>
-          </div> */}
+          </div>
           
           <div className="flex flex-col sm:flex-row gap-3">
             <a 
