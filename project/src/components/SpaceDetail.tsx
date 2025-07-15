@@ -28,10 +28,11 @@ const SpaceDetail: React.FC<SpaceDetailProps> = ({ space, onClose }) => {
         type="place"
       />
     <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 overflow-y-auto">
-      <div 
-        className="bg-white rounded-xl max-w-3xl w-full max-h-screen overflow-y-auto relative animate-fadeIn"
-        onClick={(e) => e.stopPropagation()}
-      >
+ 
+    <div 
+      className="bg-white rounded-xl max-w-3xl w-full max-h-screen overflow-y-auto relative animate-fadeIn"
+      onClick={(e) => e.stopPropagation()}
+        >
         <button 
           onClick={onClose}
           className="absolute top-4 right-4 z-10 bg-white rounded-full p-2 shadow-md hover:bg-gray-100 transition-colors duration-200"
@@ -89,7 +90,7 @@ const SpaceDetail: React.FC<SpaceDetailProps> = ({ space, onClose }) => {
           </div>
           
           <h3 className="text-lg font-semibold mb-3">Location</h3>
-            <h3 className="text-lg font-semibold mb-3" >{space.address}, {space.city}</h3>
+            <p className="text-lg font-semibold mb-3" >{space.address}, {space.city}</p>
           <div className="bg-gray-100 h-48 rounded-lg mb-6 flex items-center justify-center">
             <div className="text-center text-gray-500">
               <MapPin size={24} className="mx-auto mb-2" />
