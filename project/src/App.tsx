@@ -10,7 +10,7 @@ import SubmitForm from './components/SubmitForm';
 import { HelmetProvider } from 'react-helmet-async'; 
 import Footer from './components/Footer';
 import { spacesData } from './data/spacesData';
-import { searchNearbyThirdSpaces } from './services/googlePlaces';
+import { searchNearbyThirdSpaces } from './services/googlePlaces.js';
 import { searchThirdSpacesByLocation } from './services/locationSearch';
 import SEOHead from './seo/SEOHead';
 import { ThirdSpace } from './types';
