@@ -1,6 +1,7 @@
 import React from 'react';
 import { ThirdSpace, spaceTypeLabels } from '../types';
 import { X, MapPin, Star, Coffee, Wifi, Clock, Users } from 'lucide-react';
+import SEOHead from '../seo/SEOHead'; 
 
 interface SpaceDetailProps {
   space: ThirdSpace | null;
@@ -18,6 +19,14 @@ const SpaceDetail: React.FC<SpaceDetailProps> = ({ space, onClose }) => {
   };
 
   return (
+    <>
+     <SEOHead 
+        title={`${space.name} - ${space.city}`}
+        description={`${space.description} Located in ${space.city}. ${space.amenities.join(', ')}.`}
+        keywords={`${space.name}, ${spaceTypeLabels[space.type]}, ${space.city}, third spaces, ${space.amenities.join(', ')}`}
+        image={space.imageUrl}
+        type="place"
+      />
     <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 overflow-y-auto">
       <div 
         className="bg-white rounded-xl max-w-3xl w-full max-h-screen overflow-y-auto relative animate-fadeIn"
@@ -105,6 +114,7 @@ const SpaceDetail: React.FC<SpaceDetailProps> = ({ space, onClose }) => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 
