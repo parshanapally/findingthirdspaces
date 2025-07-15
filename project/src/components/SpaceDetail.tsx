@@ -18,6 +18,18 @@ const SpaceDetail: React.FC<SpaceDetailProps> = ({ space, onClose }) => {
     'Study rooms': <Users size={16} className="mr-2" />
   };
 
+  const getDirectionsUrl = (lat: number, lng: number) => {
+  // Only use Apple Maps for actual iOS mobile devices
+  const isIOSMobile = /iPhone|iPod/.test(navigator.userAgent);
+  
+  if (isIOSMobile) {
+    return `https://maps.apple.com/?daddr=${lat},${lng}`;
+  } else {
+    // Everyone else gets Google Maps (Android, Desktop, iPad)
+    return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+  }
+};
+
   return (
     <>
       <SEOHead 
@@ -93,10 +105,17 @@ const SpaceDetail: React.FC<SpaceDetailProps> = ({ space, onClose }) => {
                 </div>
               ))}
             </div>
+
+            <div className="mb-4">
+              <div className="flex items-center text-gray-600 mb-3">
+                <MapPin size={16} className="mr-2" />
+                <span className="text-sm font-medium">{space.address}, {space.city} </span>
+              </div>
+            </div>
             
             {/* Get Directions Button - Prominent! */}
             <a 
-              href={`https://www.google.com/maps/dir/?api=1&destination=${space.coordinates.lat},${space.coordinates.lng}`}
+              href={getDirectionsUrl(space.coordinates.lat, space.coordinates.lng)}
               target="_blank"
               rel="noopener noreferrer"
               className="w-full bg-indigo-600 text-white py-4 px-6 rounded-lg font-medium hover:bg-indigo-700 transition-colors duration-200 text-center text-lg flex items-center justify-center"
