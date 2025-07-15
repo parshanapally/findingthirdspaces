@@ -7,10 +7,12 @@ import SpacesList from './components/SpacesList';
 import MapSection from './components/MapSection';
 import SpaceDetail from './components/SpaceDetail';
 import SubmitForm from './components/SubmitForm';
+import { HelmetProvider } from 'react-helmet-async'; 
 import Footer from './components/Footer';
 import { spacesData } from './data/spacesData';
 import { searchNearbyThirdSpaces } from './services/googlePlaces';
 import { searchThirdSpacesByLocation } from './services/locationSearch';
+import SEOHead from './seo/SEOHead';
 import { ThirdSpace } from './types';
 
 function App() {
@@ -112,7 +114,9 @@ function App() {
   };
 
   return (
+  <HelmetProvider> {/* Add this wrapper */}
     <div className="min-h-screen">
+      <SEOHead/>
       <Header />
       <Hero 
         onFindNearby={findNearbySpaces} 
@@ -140,6 +144,7 @@ function App() {
         />
       )}
     </div>
+    </HelmetProvider>
   );
 }
 
