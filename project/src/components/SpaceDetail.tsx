@@ -88,8 +88,9 @@ const SpaceDetail: React.FC<SpaceDetailProps> = ({ space, onClose }) => {
             ))}
           </div>
           
-          {/* <h3 className="text-lg font-semibold mb-3">Location</h3>
-          <div className="bg-gray-100 h-48 rounded-lg mb-6 flex items-center justify-center">
+          <h3 className="text-lg font-semibold mb-3">Location</h3>
+            <h3 className="text-lg font-semibold mb-3" >{space.address}, {space.city}</h3>
+          {/* <div className="bg-gray-100 h-48 rounded-lg mb-6 flex items-center justify-center">
             <div className="text-center text-gray-500">
               <MapPin size={24} className="mx-auto mb-2" />
               <p>Interactive map would be displayed here</p>
@@ -97,9 +98,9 @@ const SpaceDetail: React.FC<SpaceDetailProps> = ({ space, onClose }) => {
             </div>
           </div> */}
           
-          {/* <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex flex-col sm:flex-row gap-3">
             <a 
-              href="#" 
+              href={`https://www.google.com/maps/dir/?api=1&destination=${space.coordinates.lat},${space.coordinates.lng}`}
               className="bg-indigo-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-indigo-700 transition-colors duration-200 text-center"
             >
               Get Directions
@@ -110,7 +111,7 @@ const SpaceDetail: React.FC<SpaceDetailProps> = ({ space, onClose }) => {
             >
               Save to Favorites
             </a>
-          </div> */}
+          </div>
         </div>
       </div>
     </div>
