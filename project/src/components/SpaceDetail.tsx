@@ -57,7 +57,7 @@ const SpaceDetail: React.FC<SpaceDetailProps> = ({ space, onClose }) => {
           <div className="relative h-48 sm:h-56">
             <img 
               src={space.imageUrl} 
-              alt={space.name} 
+              alt={`${space.name} - ${spaceTypeLabels[space.type]} in ${space.city} featuring ${space.amenities.slice(0,2).join(' and ')}`}
               className="w-full h-full object-cover object-center rounded-t-xl"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent rounded-t-xl"></div>
@@ -105,6 +105,14 @@ const SpaceDetail: React.FC<SpaceDetailProps> = ({ space, onClose }) => {
                 </div>
               ))}
             </div>
+
+            {/* <a 
+              href={space.googleReviewsUrl}
+              target="_blank"
+              className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg..."
+            >
+              📝 View Google Reviews
+            </a> */}
 
             <div className="mb-4">
               <div className="flex items-center text-gray-600 mb-3">

@@ -12,6 +12,7 @@ export interface ThirdSpace {
     lat: number;
     lng: number;
   };
+  googleReviewsUrl: string;
 }
 
 export type SpaceType = 
