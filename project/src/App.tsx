@@ -24,16 +24,26 @@ function App() {
 
   useEffect(() => {
     document.title = "Third Spaces - Discover Places Beyond Home & Work";
+    
+    // Simple analytics logging for now
+    console.log('Analytics: App loaded');
   }, []);
 
   const handleSpaceClick = (id: string) => {
     const space = spaces.find(space => space.id === id);
     setSelectedSpace(space || null);
+    
+    // Track space clicks
+    if (space) {
+      console.log('Analytics: Space clicked -', space.name, 'in', space.city);
+    }
   };
 
   const findNearbySpaces = () => {
     setLoading(true);
     setSearchLocation('');
+    
+    console.log('Analytics: Nearby search started');
     
     if (!navigator.geolocation) {
       alert('Geolocation is not supported by this browser.');
@@ -55,6 +65,8 @@ function App() {
             setSpaces(realSpaces);
             setUsingRealData(true);
             setSearchLocation('your location');
+            
+            console.log('Analytics: Nearby search success -', realSpaces.length, 'results found');
           } else {
             alert('No third spaces found nearby. Showing sample locations.');
             setSpaces(spacesData);
@@ -82,6 +94,8 @@ function App() {
   const searchByLocation = async (query: string) => {
     setLoading(true);
     
+    console.log('Analytics: Location search -', query);
+    
     try {
       const searchResults = await searchThirdSpacesByLocation(query);
       
@@ -89,6 +103,8 @@ function App() {
         setSpaces(searchResults);
         setUsingRealData(true);
         setSearchLocation(query);
+        
+        console.log('Analytics: Location search success -', searchResults.length, 'results for', query);
       } else {
         alert(`No third spaces found for "${query}". Try a different search.`);
         setSpaces(spacesData);
@@ -111,39 +127,41 @@ function App() {
     setSpaces(spacesData);
     setUsingRealData(false);
     setSearchLocation('');
+    
+    console.log('Analytics: Reset to sample data');
   };
 
   return (
-  <HelmetProvider> {/* Add this wrapper */}
-    <div className="min-h-screen">
-      <SEOHead/>
-      <Header />
-      <Hero 
-        onFindNearby={findNearbySpaces} 
-        onSearchLocation={searchByLocation}
-        loading={loading}
-      />
-   
-      <SpacesList 
-        spaces={spaces} 
-        onSpaceClick={handleSpaceClick}
-        loading={loading}
-        usingRealData={usingRealData}
-        onFindNearby={findNearbySpaces}
-        onResetToSample={resetToSampleData}
-        searchLocation={searchLocation}
-      />
-     <Categories />
-      <MapSection spaces={spaces} onSpaceClick={handleSpaceClick} />
-      {/* <SubmitForm /> */}
-      <Footer />
-      {selectedSpace && (
-        <SpaceDetail 
-          space={selectedSpace} 
-          onClose={() => setSelectedSpace(null)} 
+    <HelmetProvider>
+      <div className="min-h-screen">
+        <SEOHead/>
+        <Header />
+        <Hero 
+          onFindNearby={findNearbySpaces} 
+          onSearchLocation={searchByLocation}
+          loading={loading}
         />
-      )}
-    </div>
+     
+        <SpacesList 
+          spaces={spaces} 
+          onSpaceClick={handleSpaceClick}
+          loading={loading}
+          usingRealData={usingRealData}
+          onFindNearby={findNearbySpaces}
+          onResetToSample={resetToSampleData}
+          searchLocation={searchLocation}
+        />
+       <Categories />
+        <MapSection spaces={spaces} onSpaceClick={handleSpaceClick} />
+        {/* <SubmitForm /> */}
+        <Footer />
+        {selectedSpace && (
+          <SpaceDetail 
+            space={selectedSpace} 
+            onClose={() => setSelectedSpace(null)} 
+          />
+        )}
+      </div>
     </HelmetProvider>
   );
 }

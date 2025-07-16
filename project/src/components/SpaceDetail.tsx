@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ThirdSpace, spaceTypeLabels } from '../types';
 import { X, MapPin, Star, Coffee, Wifi, Clock, Users } from 'lucide-react';
 import SEOHead from '../seo/SEOHead'; 
+ 
 
 interface SpaceDetailProps {
   space: ThirdSpace | null;
@@ -18,9 +19,16 @@ const SpaceDetail: React.FC<SpaceDetailProps> = ({ space, onClose }) => {
     'Study rooms': <Users size={16} className="mr-2" />
   };
 
+  // Track when someone views this space detail
+  useEffect(() => {
+  console.log('Analytics: Space detail viewed -', space.name, 'in', space.city);
+}, [space.name, space.city]);
+
   const getDirectionsUrl = (lat: number, lng: number) => {
   // Only use Apple Maps for actual iOS mobile devices
   const isIOSMobile = /iPhone|iPod/.test(navigator.userAgent);
+
+ 
   
   if (isIOSMobile) {
     return `https://maps.apple.com/?daddr=${lat},${lng}`;
@@ -28,6 +36,14 @@ const SpaceDetail: React.FC<SpaceDetailProps> = ({ space, onClose }) => {
     // Everyone else gets Google Maps (Android, Desktop, iPad)
     return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
   }
+};
+
+ // Track Get Directions clicks with map type
+const handleDirectionsClick = () => {
+  const isIOSMobile = /iPhone|iPod/.test(navigator.userAgent);
+  const mapType = isIOSMobile ? 'apple_maps' : 'google_maps';
+  
+  console.log('Analytics: Get Directions clicked -', space.name, 'using', mapType);
 };
 
   return (
@@ -122,15 +138,16 @@ const SpaceDetail: React.FC<SpaceDetailProps> = ({ space, onClose }) => {
             </div>
             
             {/* Get Directions Button - Prominent! */}
-            <a 
-              href={getDirectionsUrl(space.coordinates.lat, space.coordinates.lng)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full bg-indigo-600 text-white py-4 px-6 rounded-lg font-medium hover:bg-indigo-700 transition-colors duration-200 text-center text-lg flex items-center justify-center"
-            >
-              <MapPin size={20} className="mr-2" />
-              Get Directions
-            </a>
+           <a 
+            href={getDirectionsUrl(space.coordinates.lat, space.coordinates.lng)}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={handleDirectionsClick} // ADD THIS LINE
+            className="w-full bg-indigo-600 text-white py-4 px-6 rounded-lg font-medium hover:bg-indigo-700 transition-colors duration-200 text-center text-lg flex items-center justify-center"
+          >
+            <MapPin size={20} className="mr-2" />
+            Get Directions
+          </a>
           </div>
         </div>
       </div>
