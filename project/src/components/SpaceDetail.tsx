@@ -107,7 +107,7 @@ const handleDirectionsClick = () => {
               </div>
             </div>
               <a 
-              href={`https://www.google.com/search?q=${encodeURIComponent(`${space.name} ${space.address} reviews`)}`}
+                href={`https://www.google.com/search?q=${encodeURIComponent(`${space.name} ${space.address} reviews`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={handleGoogleReviewsClick}

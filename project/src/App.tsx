@@ -7,6 +7,8 @@ import SpacesList from './components/SpacesList';
 import MapSection from './components/MapSection';
 import SpaceDetail from './components/SpaceDetail';
 import SubmitForm from './components/SubmitForm';
+import NotFoundPage from './components/NotFoundPage';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async'; 
 import Footer from './components/Footer';
 import { spacesData } from './data/spacesData';
@@ -131,37 +133,52 @@ function App() {
     console.log('Analytics: Reset to sample data');
   };
 
+    // Add this helper for 404 page
+  const popularSpaces = spacesData.slice(0, 4).map(space => ({
+    id: space.id,
+    name: space.name,
+    type: space.type,
+    city: space.city
+  }));
+
   return (
     <HelmetProvider>
-      <div className="min-h-screen">
-        <SEOHead/>
-        <Header />
-        <Hero 
-          onFindNearby={findNearbySpaces} 
-          onSearchLocation={searchByLocation}
-          loading={loading}
-        />
-     
-        <SpacesList 
-          spaces={spaces} 
-          onSpaceClick={handleSpaceClick}
-          loading={loading}
-          usingRealData={usingRealData}
-          onFindNearby={findNearbySpaces}
-          onResetToSample={resetToSampleData}
-          searchLocation={searchLocation}
-        />
-       <Categories />
-        <MapSection spaces={spaces} onSpaceClick={handleSpaceClick} />
-        {/* <SubmitForm /> */}
-        <Footer />
-        {selectedSpace && (
-          <SpaceDetail 
-            space={selectedSpace} 
-            onClose={() => setSelectedSpace(null)} 
-          />
-        )}
-      </div>
+      <Router>
+        <Routes>
+           <Route path="/" element={
+          <div className="min-h-screen">
+            <SEOHead/>
+            <Header />
+            <Hero 
+              onFindNearby={findNearbySpaces} 
+              onSearchLocation={searchByLocation}
+              loading={loading}
+            />
+        
+            <SpacesList 
+              spaces={spaces} 
+              onSpaceClick={handleSpaceClick}
+              loading={loading}
+              usingRealData={usingRealData}
+              onFindNearby={findNearbySpaces}
+              onResetToSample={resetToSampleData}
+              searchLocation={searchLocation}
+            />
+          <Categories />
+            <MapSection spaces={spaces} onSpaceClick={handleSpaceClick} />
+            {/* <SubmitForm /> */}
+            <Footer />
+            {selectedSpace && (
+              <SpaceDetail 
+                space={selectedSpace} 
+                onClose={() => setSelectedSpace(null)} 
+              />
+            )}
+          </div>
+           }/>
+          <Route path="*" element={<NotFoundPage popularSpaces={popularSpaces} />} />
+      </Routes>
+      </Router>
     </HelmetProvider>
   );
 }
