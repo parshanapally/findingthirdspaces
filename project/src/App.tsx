@@ -7,13 +7,13 @@ import SpacesList from './components/SpacesList';
 import MapSection from './components/MapSection';
 import SpaceDetail from './components/SpaceDetail';
 import SubmitForm from './components/SubmitForm';
-import NotFoundPage from './components/NotFoundPage';
+import NotFoundPage from './components/NotFoundPage.js';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async'; 
 import Footer from './components/Footer';
 import { spacesData } from './data/spacesData';
-import { searchNearbyThirdSpaces } from './services/googlePlaces.js';
-import { searchThirdSpacesByLocation } from './services/locationSearch';
+import { searchNearbyThirdSpaces } from './services/googlePlaces';
+import { searchThirdSpacesByLocation } from './services/locationSearch.js';
 import SEOHead from './seo/SEOHead';
 import { ThirdSpace } from './types';
 
@@ -113,9 +113,9 @@ function App() {
         setUsingRealData(false);
         setSearchLocation('');
       }
-    } catch (error) {
+      } catch (error) {
       console.error('Search error:', error);
-      const errorMessage = error.message || 'Search failed. Please try again.';
+      const errorMessage = error instanceof Error ? error.message : 'Search failed. Please try again.';
       alert(errorMessage);
       setSpaces(spacesData);
       setUsingRealData(false);

@@ -1,4 +1,7 @@
 import { Loader } from '@googlemaps/js-api-loader';
+import { ThirdSpace, SpaceType } from '../types';
+
+
 
 const loader = new Loader({
   apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
@@ -6,7 +9,10 @@ const loader = new Loader({
   libraries: ['places']
 });
 
-export const searchNearbyThirdSpaces = async (location, radius = 5000) => {
+export const searchNearbyThirdSpaces = async (
+  location: { lat: number; lng: number }, 
+  radius: number = 5000
+): Promise<ThirdSpace[]> => {
   try {
     const google = await loader.load();
     
@@ -33,7 +39,12 @@ export const searchNearbyThirdSpaces = async (location, radius = 5000) => {
   }
 };
 
-const searchByType = (service, location, type, radius) => {
+const searchByType = (
+  service: google.maps.places.PlacesService, 
+  location: { lat: number; lng: number }, 
+  type: string, 
+  radius: number
+): Promise<any[]> => {
   return new Promise((resolve) => {
     const request = {
       location: new google.maps.LatLng(location.lat, location.lng),
@@ -51,7 +62,7 @@ const searchByType = (service, location, type, radius) => {
   });
 };
 
-const removeDuplicates = (results) => {
+const removeDuplicates = (results: any[]): any[] => {
   const seen = new Set();
   return results.filter(place => {
     if (seen.has(place.place_id)) {
@@ -62,7 +73,7 @@ const removeDuplicates = (results) => {
   });
 };
 
-const formatResults = (results) => {
+const formatResults = (results: any[]): ThirdSpace[] => {
   return results.map(place => ({
     id: place.place_id,
     name: place.name,
@@ -78,19 +89,21 @@ const formatResults = (results) => {
     coordinates: {
       lat: place.geometry.location.lat(),
       lng: place.geometry.location.lng()
-    }
+    },
+    // Add this line to your return object:
+    googleReviewsUrl: `https://www.google.com/search?q=${encodeURIComponent(`${place.name} ${place.vicinity} reviews`)}`
   }));
 };
 
-const determineThirdSpaceType = (types) => {
+const determineThirdSpaceType = (types: string[]): SpaceType => {
   if (types.includes('library')) return 'library';
   if (types.includes('cafe') || types.includes('restaurant')) return 'cafe';
   if (types.includes('book_store')) return 'bookstore';
   if (types.includes('park')) return 'park';
-  return 'other';
+  return 'cafe';
 };
 
-const extractAmenities = (place) => {
+const extractAmenities = (place: any): string[] => {
   const amenities = [];
   if (place.price_level <= 2) amenities.push('Affordable');
   if (place.rating >= 4.0) amenities.push('Highly rated');

@@ -1,12 +1,14 @@
 import { Loader } from '@googlemaps/js-api-loader';
+import { ThirdSpace, SpaceType } from '../types';
 
 const loader = new Loader({
   apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
   version: 'weekly',
-  libraries: ['places']
+  libraries: ['places'],
+
 });
 
-export const searchThirdSpacesByLocation = async (searchQuery) => {
+export const searchThirdSpacesByLocation = async (searchQuery: string): Promise<ThirdSpace[]> => {
   try {
     const google = await loader.load();
     
@@ -44,7 +46,7 @@ export const searchThirdSpacesByLocation = async (searchQuery) => {
   }
 };
 
-const parseSearchQuery = (query) => {
+const parseSearchQuery = (query: string) => {
   const lowerQuery = query.toLowerCase();
   
   // Extract place type from the query
@@ -87,13 +89,13 @@ const parseSearchQuery = (query) => {
   return { placeType, placeTypeWord, location };
 };
 
-const geocodeLocation = (geocoder, location) => {
+const geocodeLocation = (geocoder: any, location: string,) => {
   return new Promise((resolve) => {
     geocoder.geocode({ 
       address: location,
       // Enable international geocoding
       componentRestrictions: {} 
-    }, (results, status) => {
+    }, (results: any[], status: string) => {
       if (status === 'OK' && results.length > 0) {
         const result = results[0];
         resolve({
@@ -110,7 +112,7 @@ const geocodeLocation = (geocoder, location) => {
   });
 };
 
-const searchPlacesByType = (service, google, location, type) => {
+const searchPlacesByType = (service: any, google: any, location: any, type: string): Promise<any[]> => {
   return new Promise((resolve) => {
     const request = {
       location: new google.maps.LatLng(location.lat, location.lng),
@@ -118,7 +120,7 @@ const searchPlacesByType = (service, google, location, type) => {
       type: type
     };
 
-    service.nearbySearch(request, (results, status) => {
+    service.nearbySearch(request, (results: any[], status: string) => {
       if (status === google.maps.places.PlacesServiceStatus.OK) {
         resolve(results || []);
       } else {
@@ -129,7 +131,7 @@ const searchPlacesByType = (service, google, location, type) => {
   });
 };
 
-const formatLocationSearchResults = (results, searchLocation) => {
+const formatLocationSearchResults = (results: any[], searchLocation: string): ThirdSpace[] => {
   return results.slice(0, 24).map(place => ({
     id: place.place_id,
     name: place.name,
@@ -148,11 +150,13 @@ const formatLocationSearchResults = (results, searchLocation) => {
     },
     priceLevel: place.price_level,
     isOpen: place.business_status === 'OPERATIONAL',
-    placeId: place.place_id
+    placeId: place.place_id,
+      // Add this line:
+    googleReviewsUrl: `https://www.google.com/search?q=${encodeURIComponent(`${place.name} ${place.vicinity || searchLocation} reviews`)}`
   }));
 };
 
-const determineThirdSpaceType = (types) => {
+const determineThirdSpaceType = (types: string[]): SpaceType => {
   if (types.includes('library')) return 'library';
   if (types.includes('cafe') || types.includes('restaurant')) return 'cafe';
   if (types.includes('book_store')) return 'bookstore';
@@ -161,7 +165,7 @@ const determineThirdSpaceType = (types) => {
   return 'cafe';
 };
 
-const extractAmenities = (place) => {
+const extractAmenities = (place: any): string[] => {
   const amenities = [];
   
   if (place.price_level && place.price_level <= 2) amenities.push('Affordable');
@@ -185,7 +189,7 @@ const extractAmenities = (place) => {
   return amenities.slice(0, 4);
 };
 
-const getDefaultImage = (types) => {
+const getDefaultImage = (types: string[]): string => {
   if (types.includes('library')) {
     return 'https://images.pexels.com/photos/590493/pexels-photo-590493.jpeg';
   }
