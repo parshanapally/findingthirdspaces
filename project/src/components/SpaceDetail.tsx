@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { ThirdSpace, spaceTypeLabels } from '../types';
-import { X, MapPin, Star, Coffee, Wifi, Clock, Users } from 'lucide-react';
+import { X, MapPin, Star, Coffee, Wifi, Clock, Users, ExternalLink } from 'lucide-react';
 import SEOHead from '../seo/SEOHead'; 
  
 
@@ -36,6 +36,11 @@ const SpaceDetail: React.FC<SpaceDetailProps> = ({ space, onClose }) => {
     // Everyone else gets Google Maps (Android, Desktop, iPad)
     return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
   }
+  
+};
+
+const handleGoogleReviewsClick = () => {
+  console.log('Analytics: Google Reviews clicked -', space.name);
 };
 
  // Track Get Directions clicks with map type
@@ -133,12 +138,12 @@ const handleDirectionsClick = () => {
             <div className="mb-4">
               <div className="flex items-center text-gray-600 mb-3">
                 <MapPin size={16} className="mr-2" />
-                <span className="text-sm font-medium">{space.address}, {space.city} </span>
+                <span className="text-sm font-medium">{space.address} </span>
               </div>
             </div>
             
             {/* Get Directions Button - Prominent! */}
-           {/* <a 
+           <a 
             href={getDirectionsUrl(space.coordinates.lat, space.coordinates.lng)}
             target="_blank"
             rel="noopener noreferrer"
@@ -147,7 +152,7 @@ const handleDirectionsClick = () => {
           >
             <MapPin size={20} className="mr-2" />
             Get Directions
-          </a> */}
+          </a>
           </div>
         </div>
       </div>
