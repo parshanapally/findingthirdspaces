@@ -11,8 +11,17 @@ export interface ThirdSpace {
   coordinates: {
     lat: number;
     lng: number;
-  };
+  }
   googleReviewsUrl: string;
+    hours?: {
+    monday?: string;
+    tuesday?: string;
+    wednesday?: string;
+    thursday?: string;
+    friday?: string;
+    saturday?: string;
+    sunday?: string;
+  } | string;
 }
 
 export type SpaceType = 

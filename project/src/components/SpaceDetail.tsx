@@ -106,6 +106,17 @@ const handleDirectionsClick = () => {
                 <div className="text-sm text-gray-500">Based on community feedback</div>
               </div>
             </div>
+              <a 
+              href={`https://www.google.com/search?q=${encodeURIComponent(`${space.name} ${space.address} reviews`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={handleGoogleReviewsClick}
+                className="w-full sm:w-1/2 bg-indigo-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-indigo-700 transition-colors duration-200 text-center text-sm flex items-center justify-center mx-auto"
+              >
+                <ExternalLink size={16} className="mr-2" />
+                View Google Reviews
+              </a>
+           
             
             {/* Description */}
             <h3 className="text-lg font-semibold mb-2">About this space</h3>
@@ -126,14 +137,34 @@ const handleDirectionsClick = () => {
                 </div>
               ))}
             </div>
+            {/* ADD THIS HOURS SECTION HERE: */}
+            {space.hours && (
+              <>
+                <h3 className="text-lg font-semibold mb-3">Hours</h3>
+                <div className="mb-6">
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <div className="flex items-center mb-3">
+                      <Clock size={16} className="mr-2 text-gray-600" />
+                      <span className="font-medium text-gray-800">Opening Hours</span>
+                    </div>
+                    {typeof space.hours === 'string' ? (
+                      <p className="text-gray-700">{space.hours}</p>
+                    ) : (
+                      <div className="space-y-2">
+                        {Object.entries(space.hours).map(([day, hours]) => (
+                          <div key={day} className="flex justify-between text-sm">
+                            <span className="capitalize font-medium text-gray-600">{day}:</span>
+                            <span className="text-gray-800">{hours}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
 
-            {/* <a 
-              href={space.googleReviewsUrl}
-              target="_blank"
-              className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg..."
-            >
-              📝 View Google Reviews
-            </a> */}
+          
 
             <div className="mb-4">
               <div className="flex items-center text-gray-600 mb-3">
