@@ -138,7 +138,7 @@ const handleDirectionsClick = () => {
             </div>
             
             {/* Get Directions Button - Prominent! */}
-           <a 
+           {/* <a 
             href={getDirectionsUrl(space.coordinates.lat, space.coordinates.lng)}
             target="_blank"
             rel="noopener noreferrer"
@@ -147,7 +147,7 @@ const handleDirectionsClick = () => {
           >
             <MapPin size={20} className="mr-2" />
             Get Directions
-          </a>
+          </a> */}
           </div>
         </div>
       </div>
