@@ -15,6 +15,7 @@ import { spacesData } from './data/spacesData';
 import { searchNearbyThirdSpaces } from './services/googlePlaces';
 import { searchThirdSpacesByLocation } from './services/locationSearch.js';
 import SEOHead from './seo/SEOHead';
+import CategoryPage from './components/CategoryPage';
 import { ThirdSpace } from './types';
 
 declare global {
@@ -199,6 +200,7 @@ function App() {
             )}
           </div>
            }/>
+           <Route path="/category/:category" element={<CategoryPage />} />
           <Route path="*" element={<NotFoundPage popularSpaces={popularSpaces} />} />
       </Routes>
       </Router>

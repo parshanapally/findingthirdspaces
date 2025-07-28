@@ -1,6 +1,7 @@
 import React from 'react';
 import { spaceTypeLabels, SpaceType } from '../types';
 import { Coffee, BookOpen, Briefcase, Trees as Tree, Users, Book, Palette } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Categories: React.FC = () => {
   const categoryIcons: Record<SpaceType, JSX.Element> = {
@@ -13,11 +14,22 @@ const Categories: React.FC = () => {
     art_gallery: <Palette size={32} className="text-indigo-600" />
   };
 
+  const categoryUrlMap: Record<SpaceType, string> = {
+  cafe: 'cafes',
+  library: 'libraries',
+  coworking: 'coworking',
+  park: 'parks',
+  community_center: 'community-centers',
+  bookstore: 'bookstores',
+  art_gallery: 'art-galleries'
+};
+
   const categories = Object.entries(spaceTypeLabels).map(([key, label]) => ({
     type: key as SpaceType,
     label,
     icon: categoryIcons[key as SpaceType],
-    description: getCategoryDescription(key as SpaceType)
+    description: getCategoryDescription(key as SpaceType),
+    url: categoryUrlMap[key as SpaceType] // ADD THIS LINE
   }));
 
   return (
@@ -30,16 +42,19 @@ const Categories: React.FC = () => {
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {categories.map((category) => (
-            <div 
-              key={category.type}
-              className="bg-white border border-gray-100 rounded-xl p-6 text-center shadow-sm hover:shadow-md transition-shadow duration-300"
-            >
-              <div className="bg-indigo-50 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                {category.icon}
-              </div>
-              <h3 className="text-lg font-semibold mb-2">{category.label}</h3>
-              <p className="text-gray-600 text-sm">{category.description}</p>
-            </div>
+            <Link
+                  key={category.type}
+                  to={`/category/${category.url}`}
+                  className="group block"
+                >
+                  <div className="bg-white border border-gray-100 rounded-xl p-6 text-center shadow-sm hover:shadow-md transition-all duration-300 group-hover:-translate-y-1">
+                    <div className="bg-indigo-50 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 group-hover:bg-indigo-100 transition-colors duration-300">
+                      {category.icon}
+                    </div>
+                    <h3 className="text-lg font-semibold mb-2 group-hover:text-indigo-600 transition-colors duration-300">{category.label}</h3>
+                    <p className="text-gray-600 text-sm group-hover:text-gray-700 transition-colors duration-300">{category.description}</p>
+                  </div>
+                </Link>
           ))}
         </div>
       </div>
