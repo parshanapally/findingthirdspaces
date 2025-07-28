@@ -3,6 +3,9 @@ import { ThirdSpace, spaceTypeLabels } from '../types';
 import { X, MapPin, Star, Coffee, Wifi, Clock, Users, ExternalLink } from 'lucide-react';
 import SEOHead from '../seo/SEOHead'; 
  
+declare global {
+  function gtag(...args: any[]): void;
+}
 
 interface SpaceDetailProps {
   space: ThirdSpace | null;
@@ -41,6 +44,11 @@ const SpaceDetail: React.FC<SpaceDetailProps> = ({ space, onClose }) => {
 
 const handleGoogleReviewsClick = () => {
   console.log('Analytics: Google Reviews clicked -', space.name);
+  // ADD this line right after it:
+  gtag('event', 'view_reviews', { 
+    event_category: 'engagement', 
+    event_label: space.name 
+  });
 };
 
  // Track Get Directions clicks with map type
@@ -49,6 +57,11 @@ const handleDirectionsClick = () => {
   const mapType = isIOSMobile ? 'apple_maps' : 'google_maps';
   
   console.log('Analytics: Get Directions clicked -', space.name, 'using', mapType);
+  // ADD this line right after it:
+  gtag('event', 'get_directions', { 
+    event_category: 'engagement', 
+    event_label: `${space.name} via ${mapType}` 
+  });
 };
 
   return (

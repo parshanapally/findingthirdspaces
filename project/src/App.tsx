@@ -17,6 +17,10 @@ import { searchThirdSpacesByLocation } from './services/locationSearch.js';
 import SEOHead from './seo/SEOHead';
 import { ThirdSpace } from './types';
 
+declare global {
+  function gtag(...args: any[]): void;
+}
+
 function App() {
   const [selectedSpace, setSelectedSpace] = useState<ThirdSpace | null>(null);
   const [spaces, setSpaces] = useState<ThirdSpace[]>(spacesData);
@@ -38,6 +42,12 @@ function App() {
     // Track space clicks
     if (space) {
       console.log('Analytics: Space clicked -', space.name, 'in', space.city);
+      gtag('event', 'space_click', {
+      event_category: 'engagement',
+      event_label: `${space.name} in ${space.city}`,
+      custom_parameter_space_name: space.name,
+      custom_parameter_city: space.city
+});
     }
   };
 
@@ -46,6 +56,7 @@ function App() {
     setSearchLocation('');
     
     console.log('Analytics: Nearby search started');
+  
     
     if (!navigator.geolocation) {
       alert('Geolocation is not supported by this browser.');
@@ -69,6 +80,10 @@ function App() {
             setSearchLocation('your location');
             
             console.log('Analytics: Nearby search success -', realSpaces.length, 'results found');
+              gtag('event', 'nearby_search', { 
+                event_category: 'engagement', 
+                value: realSpaces.length 
+              });
           } else {
             alert('No third spaces found nearby. Showing sample locations.');
             setSpaces(spacesData);
@@ -107,6 +122,11 @@ function App() {
         setSearchLocation(query);
         
         console.log('Analytics: Location search success -', searchResults.length, 'results for', query);
+        gtag('event', 'search', { 
+          search_term: query, 
+          event_category: 'engagement',
+          value: searchResults.length 
+        });
       } else {
         alert(`No third spaces found for "${query}". Try a different search.`);
         setSpaces(spacesData);
@@ -131,6 +151,9 @@ function App() {
     setSearchLocation('');
     
     console.log('Analytics: Reset to sample data');
+    gtag('event', 'reset_to_sample', { 
+      event_category: 'engagement' 
+    });
   };
 
     // Add this helper for 404 page
