@@ -188,7 +188,10 @@ function App() {
               onResetToSample={resetToSampleData}
               searchLocation={searchLocation}
             />
-          <Categories />
+            {/* <Categories 
+              searchLocation={searchLocation} 
+              usingRealData={usingRealData} 
+            /> */}
             <MapSection spaces={spaces} onSpaceClick={handleSpaceClick} />
             {/* <SubmitForm /> */}
             <Footer />

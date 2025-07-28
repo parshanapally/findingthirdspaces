@@ -30,6 +30,19 @@ const MapSection: React.FC<MapSectionProps> = ({ spaces, onSpaceClick }) => {
           return;
         }
 
+        // Check if script is already loading/loaded
+        const existingScript = document.querySelector('script[src*="maps.googleapis.com"]');
+        if (existingScript) {
+          // Script exists, wait for it to load
+          if (window.google && window.google.maps) {
+            setMapLoaded(true);
+          } else {
+            existingScript.addEventListener('load', () => setMapLoaded(true));
+            existingScript.addEventListener('error', () => setMapError(true));
+          }
+          return;
+        }
+
         // Load Google Maps script
         const script = document.createElement('script');
         script.src = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}&libraries=places`;
@@ -84,64 +97,121 @@ const MapSection: React.FC<MapSectionProps> = ({ spaces, onSpaceClick }) => {
   useEffect(() => {
     if (!mapInstanceRef.current || !mapLoaded) return;
 
-    // Clear existing markers
-    markersRef.current.forEach(marker => marker.setMap(null));
+    // Clear existing markers with proper error handling
+    markersRef.current.forEach(marker => {
+      try {
+        if (marker && typeof marker.setMap === 'function') {
+          marker.setMap(null);
+        }
+      } catch (error) {
+        console.warn('Error clearing marker:', error);
+      }
+    });
     markersRef.current = [];
 
     if (spaces.length === 0) return;
 
     // Add markers for each space
     const bounds = new window.google.maps.LatLngBounds();
+    let validMarkersCount = 0;
     
     spaces.forEach((space) => {
-      const marker = new window.google.maps.Marker({
-        position: { lat: space.coordinates.lat, lng: space.coordinates.lng },
-        map: mapInstanceRef.current,
-        title: space.name,
-        icon: {
-          url: getMarkerIcon(space.type),
-          scaledSize: new window.google.maps.Size(30, 30),
+      try {
+        // Validate coordinates before creating marker
+        if (!space.coordinates || 
+            typeof space.coordinates.lat !== 'number' || 
+            typeof space.coordinates.lng !== 'number' ||
+            isNaN(space.coordinates.lat) || 
+            isNaN(space.coordinates.lng)) {
+          console.warn('Invalid coordinates for space:', space.name, space.coordinates);
+          return;
         }
-      });
 
-      // Add click listener
-      marker.addListener('click', () => {
-        onSpaceClick(space.id);
-      });
+        const position = { 
+          lat: Number(space.coordinates.lat), 
+          lng: Number(space.coordinates.lng) 
+        };
 
-      // Create info window
-      const infoWindow = new window.google.maps.InfoWindow({
-        content: `
-          <div style="padding: 8px; max-width: 200px;">
-            <h3 style="margin: 0 0 8px 0; font-size: 14px; font-weight: bold;">${space.name}</h3>
-            <p style="margin: 0 0 4px 0; font-size: 12px; color: #666;">${space.address}</p>
-            <p style="margin: 0; font-size: 12px;">⭐ ${space.rating} • ${space.type}</p>
-          </div>
-        `
-      });
+        const marker = new window.google.maps.Marker({
+          position: position,
+          map: mapInstanceRef.current,
+          title: space.name,
+          icon: {
+            url: getMarkerIcon(space.type),
+            scaledSize: new window.google.maps.Size(30, 30),
+          }
+        });
 
-      // Show info window on hover
-      marker.addListener('mouseover', () => {
-        infoWindow.open(mapInstanceRef.current, marker);
-      });
+        // Add click listener
+        marker.addListener('click', () => {
+          onSpaceClick(space.id);
+        });
 
-      marker.addListener('mouseout', () => {
-        infoWindow.close();
-      });
+        // Create info window
+        const infoWindow = new window.google.maps.InfoWindow({
+          content: `
+            <div style="padding: 8px; max-width: 200px;">
+              <h3 style="margin: 0 0 8px 0; font-size: 14px; font-weight: bold;">${space.name}</h3>
+              <p style="margin: 0 0 4px 0; font-size: 12px; color: #666;">${space.address || 'Address not available'}</p>
+              <p style="margin: 0; font-size: 12px;">⭐ ${space.rating || 'N/A'} • ${space.type}</p>
+            </div>
+          `
+        });
 
-      markersRef.current.push(marker);
-      bounds.extend(marker.getPosition());
+        // Show info window on hover
+        marker.addListener('mouseover', () => {
+          infoWindow.open(mapInstanceRef.current, marker);
+        });
+
+        marker.addListener('mouseout', () => {
+          infoWindow.close();
+        });
+
+        markersRef.current.push(marker);
+        
+        // FIXED: Use position directly instead of marker.getPosition()
+        bounds.extend(position);
+        validMarkersCount++;
+
+      } catch (error) {
+        console.error('Error creating marker for space:', space.name, error);
+      }
     });
 
-    // Fit map to show all markers
-    if (spaces.length > 1) {
-      mapInstanceRef.current.fitBounds(bounds);
-    } else if (spaces.length === 1) {
-      mapInstanceRef.current.setCenter({ 
-        lat: spaces[0].coordinates.lat, 
-        lng: spaces[0].coordinates.lng 
-      });
-      mapInstanceRef.current.setZoom(14);
+    // Fit map to show all markers with proper validation
+    try {
+      if (validMarkersCount > 1 && !bounds.isEmpty()) {
+        mapInstanceRef.current.fitBounds(bounds);
+        
+        // Prevent excessive zoom for close markers
+        window.google.maps.event.addListenerOnce(mapInstanceRef.current, 'bounds_changed', () => {
+          const zoom = mapInstanceRef.current.getZoom();
+          if (zoom && zoom > 16) {
+            mapInstanceRef.current.setZoom(16);
+          }
+        });
+      } else if (validMarkersCount === 1 && spaces[0]?.coordinates) {
+        mapInstanceRef.current.setCenter({ 
+          lat: Number(spaces[0].coordinates.lat), 
+          lng: Number(spaces[0].coordinates.lng) 
+        });
+        mapInstanceRef.current.setZoom(14);
+      }
+    } catch (error) {
+      console.error('Error fitting bounds:', error);
+      // Fallback: center on first valid space
+      const firstValidSpace = spaces.find(space => 
+        space.coordinates && 
+        typeof space.coordinates.lat === 'number' && 
+        typeof space.coordinates.lng === 'number'
+      );
+      if (firstValidSpace) {
+        mapInstanceRef.current.setCenter({
+          lat: Number(firstValidSpace.coordinates.lat),
+          lng: Number(firstValidSpace.coordinates.lng)
+        });
+        mapInstanceRef.current.setZoom(12);
+      }
     }
   }, [spaces, mapLoaded, onSpaceClick]);
 
@@ -157,6 +227,21 @@ const MapSection: React.FC<MapSectionProps> = ({ spaces, onSpaceClick }) => {
     }
   };
 
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      markersRef.current.forEach(marker => {
+        try {
+          if (marker && typeof marker.setMap === 'function') {
+            marker.setMap(null);
+          }
+        } catch (error) {
+          console.warn('Error cleaning up marker:', error);
+        }
+      });
+    };
+  }, []);
+
   if (mapError) {
     return (
       <section id="map" className="py-16 bg-indigo-50">
@@ -167,6 +252,7 @@ const MapSection: React.FC<MapSectionProps> = ({ spaces, onSpaceClick }) => {
               <div className="text-center">
                 <MapPin size={40} className="mx-auto mb-4 text-gray-400" />
                 <p className="text-gray-600">Map unavailable</p>
+                <p className="text-sm text-gray-500 mt-2">Please check your internet connection and API key</p>
               </div>
             </div>
           </div>
@@ -187,7 +273,7 @@ const MapSection: React.FC<MapSectionProps> = ({ spaces, onSpaceClick }) => {
         <div className="bg-white rounded-xl shadow-md overflow-hidden">
           <div className="h-96 relative">
             {!mapLoaded && (
-              <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+              <div className="absolute inset-0 flex items-center justify-center bg-gray-100 z-10">
                 <div className="text-center">
                   <Loader size={40} className="mx-auto mb-4 text-indigo-600 animate-spin" />
                   <p className="text-gray-600">Loading map...</p>

@@ -5,7 +5,6 @@ const loader = new Loader({
   apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
   version: 'weekly',
   libraries: ['places'],
-
 });
 
 export const searchThirdSpacesByLocation = async (searchQuery: string): Promise<ThirdSpace[]> => {
@@ -18,7 +17,7 @@ export const searchThirdSpacesByLocation = async (searchQuery: string): Promise<
     );
 
     // Parse the search query to extract place type and location
-    const { placeType, location } = parseSearchQuery(searchQuery);
+    const { placeTypes, location } = parseSearchQuery(searchQuery);
     
     // Geocode the location (works internationally)
     const geocodeResult = await geocodeLocation(geocoder, location);
@@ -26,19 +25,29 @@ export const searchThirdSpacesByLocation = async (searchQuery: string): Promise<
       throw new Error(`Could not find location: ${location}`);
     }
 
-    // Search for places near that location
-    const results = await searchPlacesByType(
-      placesService, 
-      google, 
-      geocodeResult, 
-      placeType
-    );
-
-    if (results.length === 0) {
-      throw new Error(`No ${placeType}s found in ${location}`);
+    // Search for ALL place types (like Find Near Me)
+    const allResults: any[] = [];
+    
+    for (const placeType of placeTypes) {
+      const results = await searchPlacesByType(
+        placesService, 
+        google, 
+        geocodeResult, 
+        placeType
+      );
+      allResults.push(...results);
     }
 
-    return formatLocationSearchResults(results, location);
+    if (allResults.length === 0) {
+      throw new Error(`No third spaces found in ${location}`);
+    }
+
+    // Remove duplicates and sort by rating (SAME AS FIND NEAR ME)
+    const uniqueResults = removeDuplicates(allResults);
+    const sortedResults = uniqueResults.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+
+    // NO SLICE LIMIT - return all results like Find Near Me
+    return formatLocationSearchResults(sortedResults, location);
     
   } catch (error) {
     console.error('Error searching by location:', error);
@@ -49,28 +58,32 @@ export const searchThirdSpacesByLocation = async (searchQuery: string): Promise<
 const parseSearchQuery = (query: string) => {
   const lowerQuery = query.toLowerCase();
   
+  // Use SAME types as Find Near Me for consistency
+  const allThirdSpaceTypes = [
+    'library', 
+    'cafe', 
+    'book_store', 
+    'park'
+  ];
+  
   // Extract place type from the query
-  let placeType = 'cafe'; // default
-  let placeTypeWord = 'cafes';
+  let placeTypes: string[] = [];
   
   if (lowerQuery.includes('library') || lowerQuery.includes('libraries')) {
-    placeType = 'library';
-    placeTypeWord = 'libraries';
+    placeTypes = ['library'];
   } else if (lowerQuery.includes('cafe') || lowerQuery.includes('coffee') || lowerQuery.includes('cafes')) {
-    placeType = 'cafe';
-    placeTypeWord = 'cafes';
+    placeTypes = ['cafe'];
   } else if (lowerQuery.includes('coworking') || lowerQuery.includes('workspace')) {
-    placeType = 'coworking_space';
-    placeTypeWord = 'coworking spaces';
+    placeTypes = ['coworking_space'];
   } else if (lowerQuery.includes('park') || lowerQuery.includes('parks')) {
-    placeType = 'park';
-    placeTypeWord = 'parks';
+    placeTypes = ['park'];
   } else if (lowerQuery.includes('bookstore') || lowerQuery.includes('book') || lowerQuery.includes('bookstores')) {
-    placeType = 'book_store';
-    placeTypeWord = 'bookstores';
+    placeTypes = ['book_store'];
   } else if (lowerQuery.includes('restaurant') || lowerQuery.includes('restaurants')) {
-    placeType = 'restaurant';
-    placeTypeWord = 'restaurants';
+    placeTypes = ['restaurant'];
+  } else {
+    // NO SPECIFIC TYPE MENTIONED - USE SAME TYPES AS FIND NEAR ME!
+    placeTypes = allThirdSpaceTypes;
   }
 
   // Extract location (everything after "in")
@@ -80,20 +93,18 @@ const parseSearchQuery = (query: string) => {
   if (inIndex !== -1) {
     location = query.substring(inIndex + 4).trim();
   } else {
-    // If no "in", assume the whole query is a location and search for cafes
+    // If no "in", assume the whole query is a location and search ALL types
     location = query.trim();
-    placeType = 'cafe';
-    placeTypeWord = 'cafes';
+    placeTypes = allThirdSpaceTypes; // Use same types as Find Near Me!
   }
 
-  return { placeType, placeTypeWord, location };
+  return { placeTypes, location };
 };
 
-const geocodeLocation = (geocoder: any, location: string,) => {
+const geocodeLocation = (geocoder: any, location: string) => {
   return new Promise((resolve) => {
     geocoder.geocode({ 
       address: location,
-      // Enable international geocoding
       componentRestrictions: {} 
     }, (results: any[], status: string) => {
       if (status === 'OK' && results.length > 0) {
@@ -116,7 +127,7 @@ const searchPlacesByType = (service: any, google: any, location: any, type: stri
   return new Promise((resolve) => {
     const request = {
       location: new google.maps.LatLng(location.lat, location.lng),
-      radius: 15000, // 15km radius for international searches
+      radius: 5000, // SAME AS FIND NEAR ME: 5km radius
       type: type
     };
 
@@ -131,8 +142,21 @@ const searchPlacesByType = (service: any, google: any, location: any, type: stri
   });
 };
 
+// Remove duplicate places (same place_id)
+const removeDuplicates = (results: any[]): any[] => {
+  const seen = new Set();
+  return results.filter(place => {
+    if (seen.has(place.place_id)) {
+      return false;
+    }
+    seen.add(place.place_id);
+    return true;
+  });
+};
+
 const formatLocationSearchResults = (results: any[], searchLocation: string): ThirdSpace[] => {
-  return results.slice(0, 24).map(place => ({
+  // NO SLICE LIMIT - return all results like Find Near Me
+  return results.map(place => ({
     id: place.place_id,
     name: place.name,
     type: determineThirdSpaceType(place.types),
@@ -151,7 +175,6 @@ const formatLocationSearchResults = (results: any[], searchLocation: string): Th
     priceLevel: place.price_level,
     isOpen: place.business_status === 'OPERATIONAL',
     placeId: place.place_id,
-      // Add this line:
     googleReviewsUrl: `https://www.google.com/search?q=${encodeURIComponent(`${place.name} ${place.vicinity || searchLocation} reviews`)}`
   }));
 };
@@ -162,7 +185,11 @@ const determineThirdSpaceType = (types: string[]): SpaceType => {
   if (types.includes('book_store')) return 'bookstore';
   if (types.includes('park')) return 'park';
   if (types.includes('coworking_space')) return 'coworking';
-  return 'cafe';
+  // Additional mappings for Google Places API types
+  if (types.includes('museum')) return 'art_gallery';
+  if (types.includes('art_gallery')) return 'art_gallery';
+  if (types.includes('community_center')) return 'community_center';
+  return 'cafe'; // fallback
 };
 
 const extractAmenities = (place: any): string[] => {
@@ -202,5 +229,5 @@ const getDefaultImage = (types: string[]): string => {
   if (types.includes('book_store')) {
     return 'https://images.pexels.com/photos/5372830/pexels-photo-5372830.jpeg';
   }
-  return 'https://images.pexels.com/photos/590493/pexels-photo-590493.jpeg';
+  return 'https://images.pexels.com/photos/590493/pexels-photo-590593.jpeg';
 };
