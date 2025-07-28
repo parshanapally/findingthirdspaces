@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { ThirdSpace, spaceTypeLabels } from '../types';
 import { X, MapPin, Star, Coffee, Wifi, Clock, Users, ExternalLink } from 'lucide-react';
 import SEOHead from '../seo/SEOHead'; 
+import StructuredData from './StructuredData';
  
 declare global {
   function gtag(...args: any[]): void;
@@ -66,6 +67,7 @@ const handleDirectionsClick = () => {
 
   return (
     <>
+      <StructuredData space={space} />
       <SEOHead 
         title={`${space.name} - ${space.city}`}
         description={`${space.description} Located in ${space.city}. ${space.amenities.join(', ')}.`}
